@@ -24,7 +24,7 @@ module load anaconda-uoneasy/2023.09-0
 # Initialize conda and activate environment
 conda init bash
 source ~/.bashrc
-source activate fuzzy
+source activate pose_env
 
 # Verify environment
 echo "Python path: $(which python)"
