@@ -30,6 +30,7 @@ source activate pose_env
 echo "Python path: $(which python)"
 echo "Conda prefix: $CONDA_PREFIX"
 
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 # Run your training
 python -m dr_former.trainer.train \
 --orig_dir data/seq_ecef \
