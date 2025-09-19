@@ -8,11 +8,6 @@ Functions:
 - track_to_enu_velocity(track, velocity, vertrate): convert track to ENU velocity
 - process_all_flights(df, interval=5, gap_thresh=30, drop_lla=True)
 
-Extras:
-- process_csv_folder(input_dir, output_dir, ...): read all CSVs in a folder and
-save as <csv_name>_ECEF.csv
-- CLI usage for single CSV or folder
-
 Notes:
 - Large gaps (> gap_thresh seconds) are flagged in 'gap_flag'. If no gaps are
 present in the entire dataset, the returned DataFrame omits 'gap_flag'.
@@ -34,14 +29,10 @@ import pandas as pd
 from scipy.interpolate import PchipInterpolator
 
 
-# ------------------------------ Configuration ------------------------------
+#Configs
 
-# Default values - defined in ONE place only
 DEFAULT_INTERVAL = 3
 DEFAULT_GAP_THRESH = 90
-
-
-# ------------------------------ Time utilities ------------------------------
 
 def _ensure_datetime(series: pd.Series) -> pd.Series:
     """Ensure a pandas Series is timezone-aware UTC datetime."""
@@ -62,7 +53,7 @@ def _build_resampled_index(start_ts: pd.Timestamp, end_ts: pd.Timestamp, interva
     return pd.date_range(start=start_ts, end=end_ts, freq=freq, inclusive="both", tz="UTC")
 
 
-# ------------------------------ Interpolation -------------------------------
+#Interpolation
 
 def _pchip_interpolate(x: np.ndarray, y: np.ndarray, x_new: np.ndarray, is_angle_deg: bool = False) -> np.ndarray:
     """Interpolate using PCHIP. If angle, unwrap in radians before interpolation."""
@@ -114,7 +105,7 @@ def _mark_gap_flags(resampled_times_sec: np.ndarray, orig_times_sec: np.ndarray,
     return flags
 
 
-# ------------------------------ Geodesy utils -------------------------------
+#Geodesy utils
 
 WGS84_A = 6378137.0  # Semi-major axis [m]
 WGS84_F = 1 / 298.257223563  # Flattening
@@ -224,7 +215,6 @@ def track_to_enu_velocity(track_deg: Iterable[float], velocity: Iterable[float],
     if track_deg.size == 0:
         return np.full_like(track_deg, np.nan, dtype="float64"), np.full_like(track_deg, np.nan, dtype="float64"), np.full_like(track_deg, np.nan, dtype="float64")
     
-    # Handle NaN tracks (first sample and any invalid tracks)
     valid_mask = np.isfinite(track_deg)
     v_e = np.full_like(track_deg, np.nan, dtype="float64")
     v_n = np.full_like(track_deg, np.nan, dtype="float64")
@@ -263,7 +253,7 @@ def encode_heading(heading_deg: Iterable[float]) -> Tuple[np.ndarray, np.ndarray
     return heading_sin.astype("float64"), heading_cos.astype("float64")
 
 
-# ---------------------------- Core preprocessing ----------------------------
+#Core preprocessing
 
 _NUMERIC_FEATURES_DEFAULT = ["lat", "lon", "baroaltitude", "velocity", "heading", "vertrate"]
 
@@ -318,8 +308,7 @@ def process_all_flights(df: pd.DataFrame, interval: int = DEFAULT_INTERVAL, gap_
     """Process a multi-flight DataFrame: resample, flag gaps, convert to ECEF, compute velocity features."""
     if df.empty:
         return df.copy()
-
-    # We expect "time" column, not "timestamp"
+        
     if "time" not in df.columns:
         raise ValueError("DataFrame must contain 'time' column")
     
@@ -354,8 +343,6 @@ def process_all_flights(df: pd.DataFrame, interval: int = DEFAULT_INTERVAL, gap_
 
         # Compute track from consecutive lat/lon positions
         track_deg = compute_track(lat_series.values, lon_series.values)
-        
-        # Optional: smooth track to reduce noise
         track_deg = smooth_track(track_deg, window_size=3)
         
         # Convert track + velocity + vertrate to ENU velocity, then to ECEF
@@ -373,12 +360,11 @@ def process_all_flights(df: pd.DataFrame, interval: int = DEFAULT_INTERVAL, gap_
         rs["velocity"] = speed
 
         if drop_lla:
-            # Drop original columns to avoid redundancy
             for c in ["lat", "lon", "baroaltitude", "velocity", "heading", "vertrate"]:
                 if c in rs.columns:
                     rs = rs.drop(columns=c)
 
-        # Reorder columns - FINAL FEATURES: x, y, z, v_x, v_y, v_z, heading_sin, heading_cos, velocity
+        # Reorder columns
         desired = ["icao24", "flight_id", "time", "x", "y", "z", "v_x", "v_y", "v_z", "heading_sin", "heading_cos", "velocity"]
         if "gap_flag" in rs.columns:
             desired.append("gap_flag")
@@ -393,7 +379,7 @@ def process_all_flights(df: pd.DataFrame, interval: int = DEFAULT_INTERVAL, gap_
     return out
 
 
-# ------------------------------ CSV conveniences ----------------------------
+#CSV conveniences
 
 def process_csv_folder(input_dir: str, output_dir: Optional[str] = None, interval: int = DEFAULT_INTERVAL, 
                     gap_thresh: int = DEFAULT_GAP_THRESH, drop_lla: bool = True, glob_pattern: str = "*.csv") -> List[str]:
