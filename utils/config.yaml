@@ -1,0 +1,156 @@
+<<<<<<< HEAD
+experiment:
+  name: "auto"  # Will be set programmatically
+  description: "Aircraft trajectory prediction with PatchTST"
+
+seed: 42
+device: "cuda"  # Force CUDA for consistency
+num_epochs: 10
+auto_resume: false
+
+data:
+  data_dir: "data/new"
+  feature_cols: ['lat', 'lon', 'velocity', 'vertrate', 'baroaltitude', 'delta_t', 'heading_sin', 'heading_cos']
+  target_cols: ['lat', 'lon', 'baroaltitude']
+  group_id_col: 'group_id'
+  batch_size: 4
+  num_workers: 0
+  pin_memory: true
+  shuffle: true
+  drop_last: false
+  
+  # Remove unused parameters
+  # window_size: 20        # REMOVE
+  # prediction_length: 20  # REMOVE
+  max_length: 20
+  truncation: false
+  padding: true
+  scaler_meta_path: "data/new/meta.pkl"
+
+# Model settings
+model:
+  # PatchTST parameters
+  seq_len: 20               # Input sequence length (context window)
+  pred_len: 20              # Prediction length
+  patch_len: 8              # Length of each patch
+  patch_stride: 0           # Stride between patches
+  window_stride: 16         # Stride between windows (for dataset)
+  d_model: 256              # Model dimension
+  n_heads: 4                # Number of attention heads
+  e_layers: 4               # Number of encoder layers
+  d_ff: 1024                # Feed-forward dimension
+  dropout: 0.1              # Dropout probability
+  output_dim: 3             # lat, lon, baroaltitude
+  fusion: false             # Use CrossChannelFusion in OutputHead
+  debug_shapes: false       # Print shapes in EncoderWrapper
+
+# Training hyperparameters
+train:
+  max_debug_batches: 2
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  optimizer: "adamw"  # adamw, adam, sgd
+  scheduler: "reduce_lr_on_plateau"  # reduce_lr_on_plateau, step
+  scheduler_patience: 3
+  scheduler_factor: 0.5
+  scheduler_min_lr: 0.000001
+  loss_type: "mse"  # mse, mae, huber
+  gradient_clip: 1.0
+  early_stopping_patience: 8
+
+# Logging and monitoring
+logging:
+  log_interval: 1
+  plot_interval: 5
+  model_save_path: "output/checkpoints"
+  plot_save_path: "output/plots"
+  tensorboard_dir: "output/tensorboard"
+  log_file: "output/logs/training.log"
+  level: "INFO"
+  show_progress_bar: true
+  verbose: true
+
+# Metrics
+metrics:
+  miss_radius_m: 32.0
+
+=======
+experiment:
+  name: "auto"  # Will be set programmatically
+  description: "Aircraft trajectory prediction with PatchTST"
+
+seed: 42
+device: "cuda"  # Force CUDA for consistency
+num_epochs: 10
+auto_resume: false
+
+data:
+  data_dir: "data/new"
+  feature_cols: ['lat', 'lon', 'velocity', 'vertrate', 'baroaltitude', 'delta_t', 'heading_sin', 'heading_cos']
+  target_cols: ['lat', 'lon', 'baroaltitude']
+  group_id_col: 'group_id'
+  batch_size: 4
+  num_workers: 0
+  pin_memory: false
+  shuffle: true
+  drop_last: false
+  
+  # Remove unused parameters
+  # window_size: 20        # REMOVE
+  # prediction_length: 20  # REMOVE
+  max_length: 20
+  truncation: false
+  padding: true
+  scaler_meta_path: "data/new/meta.pkl"
+
+# Model settings
+model:
+  # PatchTST parameters
+  seq_len: 20               # Input sequence length (context window)
+  pred_len: 20              # Prediction length
+  patch_len: 8              # Length of each patch
+  patch_stride: 2           # Stride between patches
+  window_stride: 16         # Stride between windows (for dataset)
+  d_model: 256              # Model dimension
+  n_heads: 4                # Number of attention heads
+  e_layers: 4               # Number of encoder layers
+  d_ff: 1024                # Feed-forward dimension
+  dropout: 0.1              # Dropout probability
+  output_dim: 3             # lat, lon, baroaltitude
+  fusion: false             # Use CrossChannelFusion in OutputHead
+  debug_shapes: false       # Print shapes in EncoderWrapper
+
+# Training hyperparameters
+train:
+  max_debug_batches: 2
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  optimizer: "adamw"  # adamw, adam, sgd
+  scheduler: "reduce_lr_on_plateau"  # reduce_lr_on_plateau, step
+  scheduler_patience: 3
+  scheduler_factor: 0.5
+  scheduler_min_lr: 0.000001
+  loss_type: "mse"  # mse, mae, huber
+  gradient_clip: 1.0
+  early_stopping_patience: 8
+
+# Logging and monitoring
+logging:
+  log_interval: 1
+  plot_interval: 5
+  model_save_path: "output/checkpoints"
+  plot_save_path: "output/plots"
+  tensorboard_dir: "output/tensorboard"
+  log_file: "output/logs/training.log"
+  level: "INFO"
+  show_progress_bar: true
+  verbose: true
+
+# Metrics
+metrics:
+  miss_radius_m: 32.0
+
+
+
+
+>>>>>>> c7f2eb60217fbb85e9d28131eb8c4c88577fb894
