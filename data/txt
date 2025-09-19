@@ -1,1 +1,1 @@
-
+This section is dedicated to data engineering where the raw ADS-B data is cleaned, segmented according to individual flights, resampled for smooth functioning with transformer models, the resampled data that was presented in degrees (lat, lon and alt) were converted to ECEF coordinates for precision and ease in processing with dead reckoning system.
